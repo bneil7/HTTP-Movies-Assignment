@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { useHistory, useLocation, useParams } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
 import axios from "axios";
 
-const initialMovieList = {
+const initialMovieVals = {
   title: "",
   director: "",
   metascore: "",
@@ -10,28 +10,31 @@ const initialMovieList = {
 };
 
 const UpdateMovieForm = props => {
-  const [movie, setMovie] = useState(initialMovieList);
+  const [movie, setMovie] = useState(initialMovieVals);
   const history = useHistory();
-  const location = useLocation();
-  const params = useParams();
+  const { id } = useParams();
 
   useEffect(() => {
-    if (location.state) {
-      setMovie(location.state);
-    } else {
-      axios
-        .get(`http://localhost:5000/api/movies/${params.id}`)
-        .then(res => {
-          setMovie(res.data);
-        })
-        .catch(err => console.log("goofin hard bud... ", err));
+    console.log(props.movieList);
+    const movieToUpdate = props.movieList.find(items => `${items.id}` === id);
+    console.log(movieToUpdate);
+    if (movieToUpdate) {
+      setMovie(movieToUpdate);
     }
-  }, []);
+  }, [props.movieList, id]);
 
   const handleChanges = e => {
+    let value = e.target.value;
+    if (e.target.name === "metascore") {
+      value = parseInt(value);
+    } else if (e.target.name === "stars") {
+      value = value.split(",");
+      console.log(value);
+    }
+
     setMovie({
       ...movie,
-      [e.target.name]: e.target.value,
+      [e.target.name]: value,
     });
   };
 
@@ -51,28 +54,28 @@ const UpdateMovieForm = props => {
   return (
     <form onSubmit={handleSubmit}>
       <input
-        type="string"
+        type="text"
         name="title"
         onChange={handleChanges}
         placeholder="title"
         value={movie.title}
       />
       <input
-        type="string"
+        type="text"
         name="director"
         onChange={handleChanges}
         placeholder="director"
         value={movie.director}
       />
       <input
-        type="string"
+        type="number"
         name="metascore"
         onChange={handleChanges}
         placeholder="metascore"
         value={movie.metascore}
       />
       <input
-        type="string"
+        type="text"
         name="stars"
         onChange={handleChanges}
         placeholder="stars"
